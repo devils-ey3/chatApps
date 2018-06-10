@@ -7,6 +7,8 @@ const publicPath = path.join(__dirname, '../public');
 
 const app = express();
 const server = http.createServer(app);
+const generateMessage = require('./utils/message');
+
 
 app.use(express.static(publicPath));
 
@@ -15,24 +17,23 @@ var io = socketIO(server);
 
 io.on('connection', (socket) => {
     // console.log("New user connected");
-    socket.emit('autoReply',{
-        "from" : "admin",
-        "Text" : "Welcome to chat"
-    })
-    socket.broadcast.emit('autoReply',{
-        "message" : "New user coonected",
-        "joinAt" : new Date().getTime()
-    })
+    socket.emit('autoReply',generateMessage('admin','Wellcome to chat'));
+    socket.broadcast.emit('autoReply',generateMessage('admin','New user join'));
 
     socket.on('disconnect', () => {
         console.log('Disconnected from server node');
     });
 
-    
-    socket.on('getMessage',(data) => {
-        console.log("Data from client ",data);
-        socket.broadcast.emit('creatMessage',data);
+    socket.on('getMessage',(message,clearTextBox) => {
+        // console.log("Data from client ",message);
+        // socket.broadcast.emit('newMessage',message);
+        io.emit('newMessage',message);
+        clearTextBox();
     });
+
+    socket.on('createLocation',(coords) => {
+        io.emit('newMessage',generateMessage('admin',`${coords.latitude} , ${coords.longitude}`))
+    })
 
 });
 

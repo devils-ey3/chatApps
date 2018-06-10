@@ -4,16 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <script src="/socket.io/socket.io.js"></script>
-    <script src="/js/index.js"></script>
+    
 </head>
 <body>
-    <h1>
-        this is text
-        this is text
-        this is text
-        this is text
-        this is text
-    </h1>
+    <form id="message-form" method="POST">
+        <input type="text" name="message">
+        <button type="submit" name="submit">Send</button>
+    </form>
+    <button id="location">Send Geolocation</button>
+
+    <ol id="message">
+        
+    </ol>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/js/libs/jquery.js"></script>
+    <script src="/js/index.js"></script>
 </body>
 </html>
