@@ -15,17 +15,23 @@ var io = socketIO(server);
 
 io.on('connection', (socket) => {
     // console.log("New user connected");
+    socket.emit('autoReply',{
+        "from" : "admin",
+        "Text" : "Welcome to chat"
+    })
+    socket.broadcast.emit('autoReply',{
+        "message" : "New user coonected",
+        "joinAt" : new Date().getTime()
+    })
+
     socket.on('disconnect', () => {
         console.log('Disconnected from server node');
     });
 
-    socket.emit('creatMessage',{
-        "from":"kira@server.com",
-        "text" : "kirainhere"
-    })
-
+    
     socket.on('getMessage',(data) => {
-        console.log("Data from client ",data); 
+        console.log("Data from client ",data);
+        socket.broadcast.emit('creatMessage',data);
     });
 
 });

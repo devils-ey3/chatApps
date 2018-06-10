@@ -1,6 +1,8 @@
 const socket = io();
 socket.on('connect', () => {
-
+    socket.on('autoReply',(data) => {
+        console.log(data); 
+    })
 });
 
 socket.on('disconnect', () => {
@@ -13,8 +15,8 @@ socket.on('creatMessage', (data) => {
 })
 
 
-socket.emit('getMessage', {
+/* socket.emit('getMessage', {
     "from": "kira@client.com",
     "text": "kirainhere",
     "creadte" : Date.now()
-})
+}) */
