@@ -7,7 +7,7 @@ const publicPath = path.join(__dirname, '../public');
 
 const app = express();
 const server = http.createServer(app);
-const generateMessage = require('./utils/message');
+const {generateMessage,generateLocationMessage} = require('./utils/message');
 
 
 app.use(express.static(publicPath));
@@ -18,7 +18,7 @@ var io = socketIO(server);
 io.on('connection', (socket) => {
     // console.log("New user connected");
     socket.emit('autoReply',generateMessage('admin','Wellcome to chat'));
-    socket.broadcast.emit('autoReply',generateMessage('admin','New user join'));
+    // socket.broadcast.emit('autoReply',generateMessage('admin','New user join'));
 
     socket.on('disconnect', () => {
         console.log('Disconnected from server node');
@@ -32,8 +32,10 @@ io.on('connection', (socket) => {
     });
 
     socket.on('createLocation',(coords) => {
-        io.emit('newMessage',generateMessage('admin',`${coords.latitude} , ${coords.longitude}`))
+        // console.log(generateLocationMessage ('admin',coords.latitude,coords.longitude));
+        io.emit('newLocationMessage',generateLocationMessage ('admin',coords.latitude,coords.longitude));
     })
+
 
 });
 

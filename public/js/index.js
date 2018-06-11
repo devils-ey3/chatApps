@@ -1,7 +1,7 @@
 const socket = io();
 socket.on('connect', () => {
-    socket.on('autoReply',(data) => {
-        $('#message').append(`<li>${data.from} : ${data.text}</li>`);
+    socket.on('autoReply', (data) => {
+        $('#message').append(`<li>${data.from} ${moment().format('h:mm a')} : ${data.text}</li>`);
     })
 });
 
@@ -11,9 +11,15 @@ socket.on('disconnect', () => {
 
 
 socket.on('newMessage', (message) => {
-    console.log("Message from server ", message);
-    $('#message').append(`<li>${message.from} : ${message.text}</li>`);
+    // console.log("Message from server ", message);
+    $('#message').append(`<li>${message.from} ${message.createAt} : ${message.text}</li>`);
+});
+
+socket.on('newLocationMessage', (message) => {
+    // console.log("Message from server ", message);
+    $('#message').append(`<li>${message.from} ${message.createAt} : <a href=${message.url} target="_blank">Location</a> </li>`);
 })
+
 
 /* 
 socket.emit('getMessage', {
@@ -25,33 +31,37 @@ socket.emit('getMessage', {
 })
  */
 
- $('#message-form').on('submit',(event) => {
-     event.preventDefault();
-     console.log();
+$('#message-form').on('submit', (event) => {
+    event.preventDefault();
+    console.log();
 
-     socket.emit('getMessage',{
-         "from": "kira",
-         "text" : $('#message-form > input[type="text"]').val(),
-         "time" :  new Date().getTime()
-         
-     },(arguments) => {
+    socket.emit('getMessage', {
+        "from": "kira",
+        "text": $('#message-form > input[type="text"]').val(),
+        "createAt": moment().format('h:mm a')
+
+    }, (arguments) => {
         $('#message-form > input[type="text"]').val("");
     })
- });
+
+});
 
 
 let locationButton = $('#location');
-
 locationButton.on('click', (arguments) => {
-    if (!navigator.geolocation){
+    if (!navigator.geolocation) {
         return alert("Geolocation is not supported by browser");
     }
+
+    locationButton.attr('disabled', 'disabled').text('Sending location.....');
     navigator.geolocation.getCurrentPosition((position) => {
-        socket.emit('createLocation',{
-            latitude : position.coords.latitude,
-            longitude : position.coords.longitude
+        locationButton.removeAttr('disabled').text('Send Geolocation');
+        socket.emit('createLocation', {
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
         });
-    },() => {
-       alert('Unable to fetch location') 
+    }, () => {
+        locationButton.removeAttr('disabled').text('Send Geolocation');
+        alert('Unable to fetch location');
     })
 })
