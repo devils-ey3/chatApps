@@ -27,7 +27,18 @@ socket.on('connect', () => {
               <p>${data.text}</p>    
             </div>
         `);
+    }); 
+    const params = $.deparam(window.location.search);
+
+    socket.emit('join',params,(err) => {
+        if (err) {
+            alert(err);
+            window.location.href = '/';
+        } else {
+            
+        }
     })
+
 
 });
 
@@ -59,6 +70,7 @@ socket.on('newLocationMessage', (message) => {
     scrollToBottom();
     
 })
+
 
 
 /* 
