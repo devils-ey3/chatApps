@@ -27,6 +27,7 @@ io.on('connection', (socket) => {
     socket.on('getMessage',(message,clearTextBox) => {
         // console.log("Data from client ",message);
         // socket.broadcast.emit('newMessage',message);
+        
         io.emit('newMessage',message);
         clearTextBox();
     });

@@ -1,8 +1,34 @@
 const socket = io();
+
+function scrollToBottom () {
+    // Selectors
+    var messages = $('#message');
+    var newMessage = messages.children('li:last-child')
+    // Heights
+    var clientHeight = messages.prop('clientHeight');
+    var scrollTop = messages.prop('scrollTop');
+    var scrollHeight = messages.prop('scrollHeight');
+    var newMessageHeight = newMessage.innerHeight();
+    var lastMessageHeight = newMessage.prev().innerHeight();
+
+    if (clientHeight + scrollTop + newMessageHeight + lastMessageHeight >= scrollHeight) {
+      messages.scrollTop(scrollHeight);
+    }
+  }
+
 socket.on('connect', () => {
     socket.on('autoReply', (data) => {
-        $('#message').append(`<li>${data.from} ${moment().format('h:mm a')} : ${data.text}</li>`);
+        $('#message').append(`
+            <div class="message__title">
+                <h4>${data.from}</h4>
+                <span>${moment().format('h:mm a')}</span>
+            </div>
+            <div class="message__body">
+              <p>${data.text}</p>    
+            </div>
+        `);
     })
+
 });
 
 socket.on('disconnect', () => {
@@ -12,12 +38,26 @@ socket.on('disconnect', () => {
 
 socket.on('newMessage', (message) => {
     // console.log("Message from server ", message);
-    $('#message').append(`<li>${message.from} ${message.createAt} : ${message.text}</li>`);
+    // $('#message').append(`<li>${message.from} ${message.createAt} : ${message.text}</li>`);
+    var template = $('#message-template').html();
+    var html = Mustache.render(template,{
+        message
+    });
+
+    $('#message').append(html);
+    scrollToBottom();
 });
 
 socket.on('newLocationMessage', (message) => {
     // console.log("Message from server ", message);
-    $('#message').append(`<li>${message.from} ${message.createAt} : <a href=${message.url} target="_blank">Location</a> </li>`);
+    var template = $('#location-message-template').html();
+    var html = Mustache.render(template,{
+        message 
+    });
+
+    $('#message').append(html);
+    scrollToBottom();
+    
 })
 
 
@@ -33,7 +73,6 @@ socket.emit('getMessage', {
 
 $('#message-form').on('submit', (event) => {
     event.preventDefault();
-    console.log();
 
     socket.emit('getMessage', {
         "from": "kira",
