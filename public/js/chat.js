@@ -29,7 +29,8 @@ socket.on('connect', () => {
         `);
     });
     const params = $.deparam(window.location.search);
-
+    params.room = params.room.toLowerCase();
+    
     socket.emit('join', params, (err) => {
         if (err) {
             alert(err);
@@ -69,7 +70,7 @@ socket.on('newLocationMessage', (message) => {
     $('#message').append(html);
     scrollToBottom();
 
-})
+});
 
 
 socket.on('updateUserList', (users) => {
@@ -78,17 +79,8 @@ socket.on('updateUserList', (users) => {
         ol.append($('<li></li>').text(user));
     }
     $('#users').html(ol);
-})
+});
 
-/* 
-socket.emit('getMessage', {
-    "from": "kira@client.com",
-    "text": "kirainhere",
-    "creadte" : Date.now()
-},() => {
-    console.log("Done"); 
-})
- */
 
 $('#message-form').on('submit', (event) => {
     event.preventDefault();

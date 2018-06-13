@@ -23,10 +23,14 @@ var io = socketIO(server);
 
 io.on('connection', (socket) => {
     // console.log("New user connected");
-
+    // socket.emit('roomList',{ hello: 'world' });
+    
     socket.on('join', (params, callback) => {
         if (!validation.isRealString(params.name) || !validation.isRealString(params.room)) {
             return callback('Name and room name are required');
+        }
+        if (users.getUserList(params.room).includes(params.name)){
+            return callback('User is exits in the room');
         }
         socket.join(params.room);
         users.removeUser(socket.id);
@@ -77,10 +81,23 @@ io.on('connection', (socket) => {
         io.to(user.room).emit('newLocationMessage', generateLocationMessage('admin', coords.latitude, coords.longitude));
     })
 
-
+//    console.log(findRooms());
 });
 
 const port = process.env.PORT || 3000;
 server.listen(port, () => {
     console.log('App listening on port ' + port);
 });
+
+function findRooms() {
+    var availableRooms = [];
+    var rooms = io.sockets.adapter.rooms;
+    if (rooms) {
+        for (var room in rooms) {
+            if (!rooms[room].hasOwnProperty(room)) {
+                availableRooms.push(room);
+            }
+        }
+    }
+    return availableRooms;
+}
