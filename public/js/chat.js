@@ -1,6 +1,6 @@
 const socket = io();
 
-function scrollToBottom () {
+function scrollToBottom() {
     // Selectors
     var messages = $('#message');
     var newMessage = messages.children('li:last-child')
@@ -12,9 +12,9 @@ function scrollToBottom () {
     var lastMessageHeight = newMessage.prev().innerHeight();
 
     if (clientHeight + scrollTop + newMessageHeight + lastMessageHeight >= scrollHeight) {
-      messages.scrollTop(scrollHeight);
+        messages.scrollTop(scrollHeight);
     }
-  }
+}
 
 socket.on('connect', () => {
     socket.on('autoReply', (data) => {
@@ -27,15 +27,15 @@ socket.on('connect', () => {
               <p>${data.text}</p>    
             </div>
         `);
-    }); 
+    });
     const params = $.deparam(window.location.search);
 
-    socket.emit('join',params,(err) => {
+    socket.emit('join', params, (err) => {
         if (err) {
             alert(err);
             window.location.href = '/';
         } else {
-            
+
         }
     })
 
@@ -51,7 +51,7 @@ socket.on('newMessage', (message) => {
     // console.log("Message from server ", message);
     // $('#message').append(`<li>${message.from} ${message.createAt} : ${message.text}</li>`);
     var template = $('#message-template').html();
-    var html = Mustache.render(template,{
+    var html = Mustache.render(template, {
         message
     });
 
@@ -62,16 +62,23 @@ socket.on('newMessage', (message) => {
 socket.on('newLocationMessage', (message) => {
     // console.log("Message from server ", message);
     var template = $('#location-message-template').html();
-    var html = Mustache.render(template,{
-        message 
+    var html = Mustache.render(template, {
+        message
     });
 
     $('#message').append(html);
     scrollToBottom();
-    
+
 })
 
 
+socket.on('updateUserList', (users) => {
+    var ol = $('<ol></ol>');
+    for (const user of users) {
+        ol.append($('<li></li>').text(user));
+    }
+    $('#users').html(ol);
+})
 
 /* 
 socket.emit('getMessage', {

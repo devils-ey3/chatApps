@@ -3,7 +3,10 @@ const express = require('express');
 const http = require('http');
 const socketIO = require('socket.io')
 const publicPath = path.join(__dirname, '../public');
+
 const validation = require('./utils/validation');
+const {Users} = require('./utils/users');
+var users = new Users();
 
 const app = express();
 const server = http.createServer(app);
@@ -23,9 +26,13 @@ io.on('connection', (socket) => {
 
     socket.on('join', (params, callback) => {
         if (!validation.isRealString(params.name) || !validation.isRealString(params.room)) {
-            callback('Name and room name are required');
+            return callback('Name and room name are required');
         }
         socket.join(params.room);
+        users.removeUser(socket.id);
+        users.addUser(socket.id,params.name,params.room);
+        io.to(params.room).emit('updateUserList',users.getUserList(params.room));
+
         // socket.leave('The Office Fans');
 
         // io.emit -> io.to('The Office Fans').emit
@@ -33,7 +40,7 @@ io.on('connection', (socket) => {
         // socket.emit
 
         socket.emit('autoReply', generateMessage('ADMIN', 'Wellcome to chat'));
-        socket.broadcast.to(params.room).emit('autoReply',generateMessage("ADMIN",`User <b>${params.name}</b> has join this room`));
+        socket.broadcast.to(params.room).emit('autoReply',generateMessage("ADMIN",`User ${params.name} has join this room`));
 
         callback();
     })
@@ -41,7 +48,11 @@ io.on('connection', (socket) => {
 
 
     socket.on('disconnect', () => {
-        console.log('Disconnected from server node');
+        var user = users.removeUser(socket.id);
+        if (user){
+            io.to(user.room).emit('updateUserList',users.getUserList(user.room));
+            io.to(user.room).emit('autoReply',generateMessage("ADMIN",`User ${user.name} has left this room`));
+        }
     });
 
     socket.on('getMessage', (message, clearTextBox) => {
@@ -51,6 +62,7 @@ io.on('connection', (socket) => {
         io.emit('newMessage', message);
         clearTextBox();
     });
+
 
     socket.on('createLocation', (coords) => {
         // console.log(generateLocationMessage ('admin',coords.latitude,coords.longitude));
