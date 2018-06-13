@@ -58,15 +58,23 @@ io.on('connection', (socket) => {
     socket.on('getMessage', (message, clearTextBox) => {
         // console.log("Data from client ",message);
         // socket.broadcast.emit('newMessage',message);
+        const user = users.getUser(message.from);
 
-        io.emit('newMessage', message);
+        msg = {
+            from : user.name,
+            createAt : message.createAt,
+            text : message.text
+        }
+
+        io.to(user.room).emit('newMessage', msg);
         clearTextBox();
     });
 
 
     socket.on('createLocation', (coords) => {
         // console.log(generateLocationMessage ('admin',coords.latitude,coords.longitude));
-        io.emit('newLocationMessage', generateLocationMessage('admin', coords.latitude, coords.longitude));
+        const user = users.getUser(socket.id);
+        io.to(user.room).emit('newLocationMessage', generateLocationMessage('admin', coords.latitude, coords.longitude));
     })
 
 

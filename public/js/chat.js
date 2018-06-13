@@ -92,9 +92,8 @@ socket.emit('getMessage', {
 
 $('#message-form').on('submit', (event) => {
     event.preventDefault();
-
     socket.emit('getMessage', {
-        "from": "kira",
+        "from": socket.id,
         "text": $('#message-form > input[type="text"]').val(),
         "createAt": moment().format('h:mm a')
 
